@@ -1,0 +1,80 @@
+{
+  "issues": [
+    "RAF-69"
+  ],
+  "arm": "A5",
+  "collection": "quati_a4_binary",
+  "finished_at": "2026-08-27T14:30:11.954656+00:00",
+  "metric": "nDCG@10",
+  "_relaxed_held_constant": "oversampling",
+  "preregistered_oversampling": 4.0,
+  "ladder": [
+    1.0,
+    2.0,
+    4.0,
+    8.0,
+    16.0
+  ],
+  "latency_repeats": 3,
+  "by_oversampling": [
+    {
+      "oversampling": 1.0,
+      "nDCG@10": 0.27471488885457573,
+      "R(rel=2)@100": 0.22593858470847977,
+      "latency_ms_median": 5.44,
+      "latency_ms_p95": 48.23,
+      "latency_samples": 150
+    },
+    {
+      "oversampling": 2.0,
+      "nDCG@10": 0.33878077360704545,
+      "R(rel=2)@100": 0.3141479488141547,
+      "latency_ms_median": 6.59,
+      "latency_ms_p95": 25.15,
+      "latency_samples": 150
+    },
+    {
+      "oversampling": 4.0,
+      "nDCG@10": 0.3648053531070445,
+      "R(rel=2)@100": 0.3775886175311274,
+      "latency_ms_median": 8.84,
+      "latency_ms_p95": 36.92,
+      "latency_samples": 150
+    },
+    {
+      "oversampling": 8.0,
+      "nDCG@10": 0.40130963566485384,
+      "R(rel=2)@100": 0.46332276171975867,
+      "latency_ms_median": 13.1,
+      "latency_ms_p95": 52.59,
+      "latency_samples": 150
+    },
+    {
+      "oversampling": 16.0,
+      "nDCG@10": 0.4186601352492691,
+      "R(rel=2)@100": 0.5305552504953654,
+      "latency_ms_median": 20.65,
+      "latency_ms_p95": 72.43,
+      "latency_samples": 150
+    }
+  ],
+  "at_preregistered": {
+    "oversampling": 4.0,
+    "nDCG@10": 0.3648053531070445,
+    "R(rel=2)@100": 0.3775886175311274,
+    "latency_ms_median": 8.84,
+    "latency_ms_p95": 36.92,
+    "latency_samples": 150
+  },
+  "best": {
+    "oversampling": 16.0,
+    "nDCG@10": 0.4186601352492691,
+    "R(rel=2)@100": 0.5305552504953654,
+    "latency_ms_median": 20.65,
+    "latency_ms_p95": 72.43,
+    "latency_samples": 150
+  },
+  "best_over_preregistered": 0.05385478214222461,
+  "spread_over_ladder": 0.14394524639469336,
+  "_reading": "A diferença entre o melhor e o piso da escada é o que o oversampling compra além do rescoring sozinho. Pequena, a recomendação do artigo é 'use rescoring' e não 'ajuste o oversampling'."
+}

@@ -1,0 +1,12 @@
+{
+  "model_id": "intfloat/multilingual-e5-base",
+  "model_revision": "d128750597153bb5987e10b1c3493a34e5a4502a",
+  "dimensions": 768,
+  "max_length": 512,
+  "batch_size": 32,
+  "dtype": "float16",
+  "pooling": "mean",
+  "normalize": true,
+  "query_prefix": "query: ",
+  "passage_prefix": "passage: "
+}

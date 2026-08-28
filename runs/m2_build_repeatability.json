@@ -1,0 +1,49 @@
+{
+  "issues": ["RAF-58", "RAF-60"],
+  "recorded_at": "2026-08-19",
+  "_provenance": "Observações extraídas dos logs das execuções de M2.1 (scripts/05_create_collections.py) e de M3.2 (scripts/10_measure_arms.py, que derruba as demais coleções antes de cada medição e portanto reconstrói os mesmos braços). Todas no mesmo host, mesmo artefato de vetores, mesma matriz. A partir de 2026-08-19 o relatório de build passa a ser gravado em runs/m3_arms.json pelo próprio script, e esta transcrição deixa de ser necessária.",
+
+  "builds": {
+    "A0": [
+      {"index_minutes": 2.7, "vector_storage_mb": 2930.8, "total_mb": 3625.0, "_note": "primeiro build de todos; page cache frio sobre o artefato de 3 GB"},
+      {"index_minutes": 0.9, "vector_storage_mb": 3246.4, "total_mb": 4011.4}
+    ],
+    "A1": [
+      {"index_minutes": 0.7, "vector_storage_mb": 3956.7, "total_mb": 4761.0},
+      {"index_minutes": 0.4, "vector_storage_mb": 3667.0, "total_mb": 4364.4}
+    ],
+    "A2": [
+      {"index_minutes": 2.2, "vector_storage_mb": 3148.7, "total_mb": 3849.2},
+      {"index_minutes": 2.2, "vector_storage_mb": 3148.7, "total_mb": 3847.8}
+    ],
+    "A3": [
+      {"index_minutes": 1.0, "vector_storage_mb": 3057.1, "total_mb": 3750.6},
+      {"index_minutes": 1.0, "vector_storage_mb": 3609.4, "total_mb": 4374.6}
+    ],
+    "A4": [
+      {"index_minutes": 0.9, "vector_storage_mb": 3022.4, "total_mb": 3713.1},
+      {"index_minutes": 0.5, "vector_storage_mb": 3022.4, "total_mb": 3716.1},
+      {"index_minutes": 0.2, "vector_storage_mb": 3022.4, "total_mb": 3716.1}
+    ]
+  },
+
+  "codebook_training_bound": {
+    "_question": "RAF-60 exige o custo de treino do codebook gravado em campo separado do tempo de indexação.",
+    "_not_obtainable_as_specified": "O cliente Qdrant não expõe campo de treino, e o servidor não emite nada sobre codebook em nível INFO — o log do container foi conferido. O treino acontece dentro do passe do otimizador e o único tempo observável é o total dele.",
+    "_what_the_repetition_shows": "Os dois braços de PQ reproduzem o tempo de otimização EXATAMENTE (2,2/2,2 e 1,0/1,0), enquanto todo braço sem PQ varia por um fator de 2 a 3 (A0 2,7→0,9; A1 0,7→0,4; A4 0,9→0,5→0,2). Determinismo é a assinatura de um passe de trabalho fixo; variabilidade é a assinatura do escalonamento do otimizador. Isso é evidência de que o tempo dos braços de PQ é dominado pelo treino do codebook.",
+    "floor_non_pq_optimizer_minutes": 0.2,
+    "pq_x16_training_upper_bound_minutes": 2.0,
+    "pq_x32_training_upper_bound_minutes": 0.8,
+    "_how_the_bound_is_derived": "Limite superior = tempo determinístico do braço de PQ menos o menor tempo de otimização já observado num braço sem PQ (A4, 0,2 min). O piso do treino não é observável.",
+    "_between_the_two_pq_arms": "A diferença de 1,2 min entre PQ x16 e PQ x32 é atribuível ao codebook e a nada mais: mesmos vetores, mesma topologia, mesma matriz, e a razão de compressão é a única coisa que muda — e é ela que dimensiona o codebook.",
+    "_conclusion": "O tempo de treino não pode ser gravado como campo separado, mas está limitado por cima em 2,0 min sobre 1M x 768. A proibição de M2.3 existia para que o treino não distorcesse a comparação de tempo de build entre braços; com o limite acima e a variabilidade do otimizador em 0,2-2,7 min nos braços sem PQ, a distorção é da ordem do próprio ruído."
+  },
+
+  "footprint_repeatability": {
+    "_criterion": "RAF-58: 'Re-running the builder on A0 reproduces the same footprint within a small tolerance.'",
+    "_verdict": "NÃO ATENDIDO como escrito. A ocupação em disco varia até 18% entre builds idênticos.",
+    "vector_storage_delta_pct": {"A0": 10.8, "A1": -7.3, "A2": 0.0, "A3": 18.1, "A4": 0.0},
+    "_cause": "O conteúdo é reproduzível — A2 e A4 repetem o vector_storage byte a byte. O que varia é a pré-alocação: o Qdrant reserva chunks de 32 MB por segmento, e quantos chunks existem depende de como o otimizador distribuiu os pontos entre os 16 segmentos naquela execução. Os deltas observados são próximos de múltiplos de 32 MB (A3 +552 ≈ 17 chunks; A1 -290 ≈ 9; A0 +316 ≈ 10).",
+    "_consequence_for_claim_c8": "A claim C8 — comprimir aumenta o armazenamento total — sobrevive, porque as faixas não se sobrepõem: o A0 ficou entre 3.625 e 4.011 MB e o A1 entre 4.364 e 4.761. Mas a margem é da ordem de duas vezes o ruído de repetição, não de dez, e o artigo tem de reportar a faixa em vez de um número por braço."
+  }
+}

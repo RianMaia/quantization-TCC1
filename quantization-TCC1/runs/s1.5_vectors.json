@@ -1,0 +1,35 @@
+{
+  "issue": "RAF-54",
+  "finished_at": "2026-08-18T23:43:10.802767+00:00",
+  "git_commit": "3a2b5f1bab9baa7f26c84679499a0883cbee7e09",
+  "corpus_sha256": "096b262a3444df3487eecedbdb26b9e443481b7d70d5cea9c6cbd0bf11219ec4",
+  "corpus_revision": "e5279055bba3e7ba1bece5c0eddd0ba232df49c3",
+  "passages": 1000000,
+  "envelope": {
+    "model_id": "intfloat/multilingual-e5-base",
+    "model_revision": "d128750597153bb5987e10b1c3493a34e5a4502a",
+    "dimensions": 768,
+    "max_length": 512,
+    "batch_size": 32,
+    "dtype": "float16",
+    "pooling": "mean",
+    "normalize": true,
+    "query_prefix": "query: ",
+    "passage_prefix": "passage: "
+  },
+  "array": {
+    "path": "data/vectors/quati_1m_float32.npy",
+    "dtype": "float32",
+    "shape": [
+      1000000,
+      768
+    ],
+    "bytes": 3072000128,
+    "sha256": "67e53a1197530c9a2badc259c5755a2099af1e3e87142d893cdff89389161dc8"
+  },
+  "timing": {
+    "resumed_from": 0,
+    "encoded": 1000000,
+    "seconds": 2373.253357093
+  }
+}

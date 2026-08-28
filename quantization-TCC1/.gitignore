@@ -1,0 +1,19 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+.DS_Store
+
+# Entradas congeladas e artefatos gerados: buscados por hash, nunca versionados.
+# O manifesto é a exceção — é ele que torna os artefatos verificáveis.
+data/*
+!data/raw/
+data/raw/*
+!data/raw/MANIFEST.json
+
+# Estado do container, não artefato do estudo.
+qdrant_storage/
+
+# Caches de ferramentas.
+.pytest_cache/
+.ruff_cache/

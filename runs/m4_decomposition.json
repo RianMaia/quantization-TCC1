@@ -1,0 +1,89 @@
+{
+  "issue": "RAF-73",
+  "metric": "nDCG@10",
+  "reference": {
+    "arm": "A0",
+    "mode": "exact",
+    "nDCG@10": 0.46694688386201927
+  },
+  "ef_ladder": [
+    128,
+    512,
+    2048,
+    8192
+  ],
+  "rescore": false,
+  "_relaxed_held_constants": [
+    "hnsw.ef_search",
+    "search_overrides.rescore"
+  ],
+  "_why": "O modo exact do Qdrant ignora quantização; sem afrouxar os dois, a decomposição é inmensurável.",
+  "converged": true,
+  "arms": {
+    "A0": {
+      "by_ef": {
+        "128": 0.4655103319049535,
+        "512": 0.46694688386201927,
+        "2048": 0.46694688386201927,
+        "8192": 0.46694688386201927
+      },
+      "plateau_ndcg10": 0.46694688386201927,
+      "quantization_error": 0.0,
+      "graph_error_at_preregistered_ef": -0.001436551957065768,
+      "reported_ndcg10": 0.4655103319049535,
+      "rescoring_recovery": 0.0
+    },
+    "A1": {
+      "by_ef": {
+        "128": 0.45141441021331274,
+        "512": 0.4585807995424373,
+        "2048": 0.459148785432806,
+        "8192": 0.459148785432806
+      },
+      "plateau_ndcg10": 0.459148785432806,
+      "quantization_error": -0.007798098429213252,
+      "graph_error_at_preregistered_ef": -0.0077343752194932724,
+      "reported_ndcg10": 0.4604186600446234,
+      "rescoring_recovery": 0.009004249831310651
+    },
+    "A2": {
+      "by_ef": {
+        "128": 0.3948247296215317,
+        "512": 0.4175357172931243,
+        "2048": 0.4242877177684825,
+        "8192": 0.4242877177684825
+      },
+      "plateau_ndcg10": 0.4242877177684825,
+      "quantization_error": -0.04265916609353676,
+      "graph_error_at_preregistered_ef": -0.029462988146950808,
+      "reported_ndcg10": 0.4410847854100392,
+      "rescoring_recovery": 0.046260055788507504
+    },
+    "A3": {
+      "by_ef": {
+        "128": 0.22715647979353726,
+        "512": 0.25480717889643295,
+        "2048": 0.2635018112471379,
+        "8192": 0.2659348851155659
+      },
+      "plateau_ndcg10": 0.2659348851155659,
+      "quantization_error": -0.20101199874645337,
+      "graph_error_at_preregistered_ef": -0.03877840532202864,
+      "reported_ndcg10": 0.39283835399199535,
+      "rescoring_recovery": 0.1656818741984581
+    },
+    "A4": {
+      "by_ef": {
+        "128": 0.07725038812638821,
+        "512": 0.11267506769175847,
+        "2048": 0.11397252243135286,
+        "8192": 0.1139230404180057
+      },
+      "plateau_ndcg10": 0.1139230404180057,
+      "quantization_error": -0.35302384344401355,
+      "graph_error_at_preregistered_ef": -0.036672652291617494,
+      "reported_ndcg10": 0.07725038812638821,
+      "rescoring_recovery": 0.0
+    }
+  }
+}

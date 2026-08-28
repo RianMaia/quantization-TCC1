@@ -1,0 +1,119 @@
+{
+  "issue": "RAF-53",
+  "finished_at": "2026-08-18T22:41:14.950947+00:00",
+  "git_commit": "eeed40fcee0fcd9e9868c7e18975c7a7f44819ce",
+  "gpu": "NVIDIA GeForce RTX 2080 Ti",
+  "torch": "2.13.0+cu130",
+  "corpus_sha256": "096b262a3444df3487eecedbdb26b9e443481b7d70d5cea9c6cbd0bf11219ec4",
+  "seed": 0,
+  "sample_size": 10000,
+  "token_lengths": {
+    "sample_n": 10000,
+    "mean": 276.2,
+    "p50": 284,
+    "p95": 361,
+    "p99": 401,
+    "sample_max": 509,
+    "longest_k": 500,
+    "corpus_token_max": 724,
+    "chosen_max_length": 512,
+    "reference_max_length": 416,
+    "sample_fraction_truncated": 0.0,
+    "tail_fraction_truncated": 0.096
+  },
+  "batch_sweep": [
+    {
+      "batch_size": 16,
+      "oom": false,
+      "seconds": 4.69,
+      "passages_per_second": 436.6,
+      "peak_vram_mib": 686
+    },
+    {
+      "batch_size": 32,
+      "oom": false,
+      "seconds": 4.44,
+      "passages_per_second": 461.4,
+      "peak_vram_mib": 820
+    },
+    {
+      "batch_size": 64,
+      "oom": false,
+      "seconds": 4.48,
+      "passages_per_second": 457.6,
+      "peak_vram_mib": 1103
+    }
+  ],
+  "batch_sweep_reference": [
+    {
+      "batch_size": 16,
+      "oom": false,
+      "seconds": 4.54,
+      "passages_per_second": 451.4,
+      "peak_vram_mib": 669
+    },
+    {
+      "batch_size": 32,
+      "oom": false,
+      "seconds": 4.41,
+      "passages_per_second": 464.7,
+      "peak_vram_mib": 788
+    },
+    {
+      "batch_size": 64,
+      "oom": false,
+      "seconds": 4.39,
+      "passages_per_second": 467.0,
+      "peak_vram_mib": 1030
+    }
+  ],
+  "encode_output_dtype": "float16",
+  "rank_agreement": {
+    "fp16": {
+      "queries": 50,
+      "documents": 10000,
+      "k": 10,
+      "identical_order": 0.42,
+      "identical_set": 0.96,
+      "mean_overlap": 0.996
+    },
+    "simulated_int8": {
+      "queries": 50,
+      "documents": 10000,
+      "k": 10,
+      "identical_order": 0.0,
+      "identical_set": 0.02,
+      "mean_overlap": 0.686
+    }
+  },
+  "throughput": {
+    "passages_per_second": 460.8,
+    "seconds_for_sample": 21.7,
+    "projected_hours_for_1m": 0.6
+  },
+  "fp16_vs_fp32": {
+    "n": 10000,
+    "min": 0.9999504165575938,
+    "p01": 0.9999780068065975,
+    "median": 0.9999939503741311,
+    "worst_angular_perturbation": 4.958344240624246e-05,
+    "fp16_norm_drift": {
+      "min": 0.9995280026489504,
+      "max": 1.0004863840519902,
+      "worst_abs": 0.0004863840519901963
+    }
+  },
+  "judged_queries": 50,
+  "envelope": {
+    "model_id": "intfloat/multilingual-e5-base",
+    "model_revision": "d128750597153bb5987e10b1c3493a34e5a4502a",
+    "dimensions": 768,
+    "max_length": 512,
+    "batch_size": 32,
+    "dtype": "float16",
+    "pooling": "mean",
+    "normalize": true,
+    "query_prefix": "query: ",
+    "passage_prefix": "passage: "
+  }
+}

@@ -1,0 +1,170 @@
+{
+  "issue": "RAF-50",
+  "points": 400000,
+  "dims": 768,
+  "float32_payload_mb": 1171.9,
+  "warmup_queries": 200,
+  "host_idle": "requerido; leituras de page cache não valem sob carga concorrente",
+  "cases": [
+    {
+      "case": "1. float32, vetores em RAM",
+      "baseline_total_mb": 280.9,
+      "states": {
+        "cold": {
+          "anon_mb": 454.6,
+          "file_mb": 409.4,
+          "total_mb": 872.5,
+          "host_available_mb": 12757.7,
+          "host_swap_used_mb": 2277.3,
+          "cgroup": "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/user.slice/libpod-a07f42fb1157c0ade3c5d4b5eb5495b982dc2e78a9fc986fa6c45618978e3c45.scope/container",
+          "taken_at": "2026-08-19T00:01:52.599072+00:00",
+          "is_void": false
+        },
+        "warm_hnsw": {
+          "anon_mb": 342.9,
+          "file_mb": 1062.6,
+          "total_mb": 1441.2,
+          "host_available_mb": 12566.0,
+          "host_swap_used_mb": 2263.0,
+          "cgroup": "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/user.slice/libpod-a07f42fb1157c0ade3c5d4b5eb5495b982dc2e78a9fc986fa6c45618978e3c45.scope/container",
+          "taken_at": "2026-08-19T00:02:08.996007+00:00",
+          "is_void": false
+        },
+        "exhaustive": {
+          "anon_mb": 342.9,
+          "file_mb": 1172.8,
+          "total_mb": 1554.5,
+          "host_available_mb": 12540.3,
+          "host_swap_used_mb": 2263.0,
+          "cgroup": "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/user.slice/libpod-a07f42fb1157c0ade3c5d4b5eb5495b982dc2e78a9fc986fa6c45618978e3c45.scope/container",
+          "taken_at": "2026-08-19T00:02:09.600041+00:00",
+          "is_void": false
+        }
+      },
+      "rss_mb": 2738.6
+    },
+    {
+      "case": "2. float32, vetores on_disk",
+      "baseline_total_mb": 274.9,
+      "states": {
+        "cold": {
+          "anon_mb": 456.4,
+          "file_mb": 18.9,
+          "total_mb": 482.7,
+          "host_available_mb": 11880.2,
+          "host_swap_used_mb": 2613.0,
+          "cgroup": "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/user.slice/libpod-cf6e72e7415bd9063feaf7db29cc5c96eeaeab411d713e5cd2c9d38126e7a0be.scope/container",
+          "taken_at": "2026-08-19T00:10:40.444605+00:00",
+          "is_void": false
+        },
+        "warm_hnsw": {
+          "anon_mb": 331.2,
+          "file_mb": 1157.8,
+          "total_mb": 1539.6,
+          "host_available_mb": 12070.7,
+          "host_swap_used_mb": 2612.9,
+          "cgroup": "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/user.slice/libpod-cf6e72e7415bd9063feaf7db29cc5c96eeaeab411d713e5cd2c9d38126e7a0be.scope/container",
+          "taken_at": "2026-08-19T00:11:11.603798+00:00",
+          "is_void": false
+        },
+        "exhaustive": {
+          "anon_mb": 331.2,
+          "file_mb": 1157.9,
+          "total_mb": 1541.5,
+          "host_available_mb": 12066.7,
+          "host_swap_used_mb": 2612.9,
+          "cgroup": "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/user.slice/libpod-cf6e72e7415bd9063feaf7db29cc5c96eeaeab411d713e5cd2c9d38126e7a0be.scope/container",
+          "taken_at": "2026-08-19T00:11:12.051037+00:00",
+          "is_void": false
+        }
+      },
+      "rss_mb": 2802.2
+    },
+    {
+      "case": "3. int8 SEM on_disk",
+      "baseline_total_mb": 275.3,
+      "states": {
+        "cold": {
+          "anon_mb": 814.8,
+          "file_mb": 22.8,
+          "total_mb": 847.1,
+          "host_available_mb": 11647.2,
+          "host_swap_used_mb": 2957.7,
+          "cgroup": "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/user.slice/libpod-79383e712e45073b25a68c6369de5b52827203b99ee99c64700e418ac3007ac8.scope/container",
+          "taken_at": "2026-08-19T00:12:59.505406+00:00",
+          "is_void": false
+        },
+        "warm_hnsw": {
+          "anon_mb": 804.5,
+          "file_mb": 28.0,
+          "total_mb": 863.1,
+          "host_available_mb": 11671.2,
+          "host_swap_used_mb": 2957.6,
+          "cgroup": "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/user.slice/libpod-79383e712e45073b25a68c6369de5b52827203b99ee99c64700e418ac3007ac8.scope/container",
+          "taken_at": "2026-08-19T00:13:01.081303+00:00",
+          "is_void": false
+        },
+        "exhaustive": {
+          "anon_mb": 798.2,
+          "file_mb": 28.0,
+          "total_mb": 862.0,
+          "host_available_mb": 11678.0,
+          "host_swap_used_mb": 2957.6,
+          "cgroup": "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/user.slice/libpod-79383e712e45073b25a68c6369de5b52827203b99ee99c64700e418ac3007ac8.scope/container",
+          "taken_at": "2026-08-19T00:13:01.515096+00:00",
+          "is_void": false
+        }
+      },
+      "rss_mb": 3472.7
+    },
+    {
+      "case": "4. int8 COM on_disk",
+      "baseline_total_mb": 272.8,
+      "states": {
+        "cold": {
+          "anon_mb": 778.4,
+          "file_mb": 1.3,
+          "total_mb": 787.2,
+          "host_available_mb": 11351.4,
+          "host_swap_used_mb": 2944.7,
+          "cgroup": "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/user.slice/libpod-051c173bfd4b112d4636715ffc0d5b4d2f20a5ea4b715aba4cf6a7b7204bc6ea.scope/container",
+          "taken_at": "2026-08-19T00:14:55.749674+00:00",
+          "is_void": false
+        },
+        "warm_hnsw": {
+          "anon_mb": 736.5,
+          "file_mb": 3.7,
+          "total_mb": 779.6,
+          "host_available_mb": 11423.1,
+          "host_swap_used_mb": 2944.7,
+          "cgroup": "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/user.slice/libpod-051c173bfd4b112d4636715ffc0d5b4d2f20a5ea4b715aba4cf6a7b7204bc6ea.scope/container",
+          "taken_at": "2026-08-19T00:14:59.637473+00:00",
+          "is_void": false
+        },
+        "exhaustive": {
+          "anon_mb": 680.5,
+          "file_mb": 970.5,
+          "total_mb": 1706.4,
+          "host_available_mb": 11493.2,
+          "host_swap_used_mb": 2944.6,
+          "cgroup": "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/user.slice/libpod-051c173bfd4b112d4636715ffc0d5b4d2f20a5ea4b715aba4cf6a7b7204bc6ea.scope/container",
+          "taken_at": "2026-08-19T00:15:01.861993+00:00",
+          "is_void": false
+        }
+      },
+      "rss_mb": 1979.7
+    }
+  ],
+  "checks": {
+    "o contador resolve a carga de vetores": true,
+    "o contador distingue configurações": true,
+    "o estado declarado importa": true,
+    "always_ram aparece em anon": true
+  },
+  "observations": {
+    "float32_on_disk_muda_a_residencia_mb": -13.0,
+    "int8_always_ram_muda_a_residencia_mb": -692.5,
+    "int8_com_on_disk_muda_a_residencia_mb": 151.9,
+    "_confirmar_em_M3": "vetores aleatórios a 400k não caracterizam braço; a 1M sim"
+  }
+}
