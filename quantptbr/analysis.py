@@ -132,3 +132,36 @@ def report() -> dict:
         "power_for_detectable_difference": POWER,
         "comparisons": rows,
     }
+
+
+def win_tie_loss(baseline: np.ndarray, variant: np.ndarray) -> tuple[int, int, int]:
+    """Em quantas consultas o braço ganha, empata e perde contra o A0.
+
+    A média esconde a forma: uma diferença pequena pode ser muitas perdas
+    pequenas ou poucas perdas grandes sobre um mar de empates exatos, e as duas
+    leituras pedem frases diferentes no texto.
+    """
+    differences = variant - baseline
+    wins = int((differences > 0).sum())
+    losses = int((differences < 0).sum())
+    return wins, int(differences.size) - wins - losses, losses
+
+
+def overlap(reference: list, variant: list, depth: int) -> float:
+    """Fração média do top-`depth` da referência que o braço também devolve.
+
+    Não usa o gabarito: mede o quanto a quantização mexe no ranking em si, e
+    por isso não depende de quais passagens o Quati julgou.
+    """
+
+    def top(rows: list) -> dict[str, set[str]]:
+        found: dict[str, set[str]] = {}
+        for row in rows:
+            if row.rank <= depth:
+                found.setdefault(row.query_id, set()).add(row.passage_id)
+        return found
+
+    left, right = top(reference), top(variant)
+    if set(left) != set(right):
+        raise ValueError("conjuntos de consultas divergem entre os dois runs")
+    return float(np.mean([len(left[q] & right[q]) / depth for q in left]))

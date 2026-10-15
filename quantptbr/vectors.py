@@ -13,6 +13,7 @@ import json
 import subprocess
 import time
 from datetime import UTC, datetime
+from pathlib import Path
 
 import numpy as np
 
@@ -50,22 +51,22 @@ def git_commit() -> str:
     ).stdout.strip()
 
 
-def read_progress() -> int:
-    if not PROGRESS_PATH.exists():
+def read_progress(path: Path = PROGRESS_PATH) -> int:
+    if not path.exists():
         return 0
-    return int(json.loads(PROGRESS_PATH.read_text(encoding="utf-8"))["rows_done"])
+    return int(json.loads(path.read_text(encoding="utf-8"))["rows_done"])
 
 
-def write_progress(rows_done: int) -> None:
-    PROGRESS_PATH.write_text(json.dumps({"rows_done": rows_done}) + "\n", encoding="utf-8")
+def write_progress(rows_done: int, path: Path = PROGRESS_PATH) -> None:
+    path.write_text(json.dumps({"rows_done": rows_done}) + "\n", encoding="utf-8")
 
 
-def open_array(rows: int, dims: int) -> np.memmap:
+def open_array(rows: int, dims: int, path: Path = ARRAY_PATH) -> np.memmap:
     """Abre o array final, criando-o com o cabeçalho .npy se ainda não existir."""
-    VECTORS_DIR.mkdir(parents=True, exist_ok=True)
-    if ARRAY_PATH.exists():
-        return np.lib.format.open_memmap(ARRAY_PATH, mode="r+")
-    return np.lib.format.open_memmap(ARRAY_PATH, mode="w+", dtype=np.float32, shape=(rows, dims))
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if path.exists():
+        return np.lib.format.open_memmap(path, mode="r+")
+    return np.lib.format.open_memmap(path, mode="w+", dtype=np.float32, shape=(rows, dims))
 
 
 def normalise(block: np.ndarray) -> np.ndarray:
@@ -80,17 +81,25 @@ def normalise(block: np.ndarray) -> np.ndarray:
     return block / np.linalg.norm(block, axis=1, keepdims=True)
 
 
-def run_pass(envelope: embedding.Envelope) -> dict:
+def run_pass(
+    envelope: embedding.Envelope, array_path: Path = ARRAY_PATH, progress_path: Path = PROGRESS_PATH
+) -> dict:
     total = corpus.EXPECTED_PASSAGES
-    done = read_progress()
-    array = open_array(total, envelope.dimensions)
+    done = read_progress(progress_path)
+    array = open_array(total, envelope.dimensions, array_path)
 
     if done >= total:
         print(f"passe já completo ({done:,} linhas). Nada a fazer.")
         return {"resumed_from": done, "encoded": 0, "seconds": 0.0}
 
     print(f"retomando em {done:,} de {total:,}" if done else f"iniciando passe de {total:,}")
-    model = embedding.load_model(envelope.dtype, envelope.max_length)
+    model = embedding.load_model(
+        envelope.dtype,
+        envelope.max_length,
+        model_id=envelope.model_id,
+        revision=envelope.model_revision,
+        dimensions=envelope.dimensions,
+    )
 
     stream = itertools.islice(corpus.iter_passages(), done, None)
     started = time.perf_counter()
@@ -117,7 +126,7 @@ def run_pass(envelope: embedding.Envelope) -> dict:
         # deixaria um bloco parcial marcado como concluído após uma queda.
         array.flush()
         done += size
-        write_progress(done)
+        write_progress(done, progress_path)
 
         encoded += size
         rate = size / (time.perf_counter() - chunk_started)
@@ -126,7 +135,11 @@ def run_pass(envelope: embedding.Envelope) -> dict:
 
     seconds = time.perf_counter() - started
     del model
-    return {"resumed_from": read_progress() - encoded, "encoded": encoded, "seconds": seconds}
+    return {
+        "resumed_from": read_progress(progress_path) - encoded,
+        "encoded": encoded,
+        "seconds": seconds,
+    }
 
 
 def verify(envelope: embedding.Envelope) -> None:

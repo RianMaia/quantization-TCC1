@@ -119,3 +119,25 @@ def test_every_comparison_carries_an_interval_and_a_detectable_difference(monkey
     for row in analysis.compare("hnsw", METRIC):
         assert {"ci_low", "ci_high", "minimum_detectable_difference", "n"} <= set(row)
         assert row["n"] == len(QUERY_IDS)
+
+
+def test_win_tie_loss_counts_each_query_once():
+    baseline = np.array([0.5, 0.5, 0.5, 0.5])
+    variant = np.array([0.6, 0.5, 0.4, 0.1])
+    assert analysis.win_tie_loss(baseline, variant) == (1, 1, 2)
+
+
+def test_overlap_ignores_order_and_everything_below_the_depth():
+    from quantptbr.retrieval import Row
+
+    def run(query_id: str, passages: list[str]) -> list:
+        return [Row(query_id, p, 0.0, rank) for rank, p in enumerate(passages, start=1)]
+
+    reference = run("1", ["a", "b", "c"]) + run("2", ["x", "y", "z"])
+    variant = run("1", ["b", "a", "q"]) + run("2", ["m", "n", "x"])
+
+    # Consulta 1 compartilha {a, b} no top-2; a consulta 2 não compartilha nada.
+    assert analysis.overlap(reference, variant, depth=2) == pytest.approx(0.5)
+    assert analysis.overlap(reference, reference, depth=3) == 1.0
+    with pytest.raises(ValueError):
+        analysis.overlap(reference, run("1", ["a"]), depth=2)

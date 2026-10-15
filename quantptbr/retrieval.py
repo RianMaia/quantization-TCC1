@@ -69,7 +69,7 @@ def embed_queries(envelope: embedding.Envelope | None = None) -> np.ndarray:
 
 def load_queries() -> tuple[list[str], np.ndarray]:
     if not QUERY_VECTORS_PATH.exists():
-        raise FileNotFoundError(f"{QUERY_VECTORS_PATH} ausente. Rode scripts/06_embed_queries.py.")
+        raise FileNotFoundError(f"{QUERY_VECTORS_PATH} ausente. Rode scripts/04_embed_queries.py.")
     return corpus.judged_query_ids(), np.load(QUERY_VECTORS_PATH)
 
 
