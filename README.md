@@ -78,6 +78,8 @@ python scripts/09_vector_geometry.py        # M2.8 — degenerescência de sinal
 python scripts/10_measure_arms.py           # M3.2/3.3/3.5 — memória, latência e disco
 python scripts/12_oversampling.py           # M3.4 — escada de oversampling do A5
 python scripts/11_regenerate.py             # M4.4 — todas as tabelas
+python scripts/13_figures.py                # figuras e análise por consulta; offline
+python scripts/14_exhaustive.py --label e5  # trilha exaustiva F32/F16/I8/B1; sem servidor
 ```
 
 As medições longas devem rodar sob `systemd-inhibit --what=sleep:idle`: se a

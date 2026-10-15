@@ -15,7 +15,7 @@ from pathlib import Path
 from quantptbr.corpus import REPO_ROOT
 
 #: Escolhido em S1.4 por um motivo verificável: é o único recuperador denso de
-#: estágio único com nDCG@10 publicado sobre o Quati 1M (0,3955, Tabela 7 de
+#: estágio único com nDCG@10 publicado sobre o Quati 1M (0,3955, Tabela 6 de
 #: Bueno et al.), nas mesmas 50 consultas que usamos. Esse número é alvo de
 #: calibração do braço A0 — não comparação científica, e sim prova de que o
 #: instrumento mede certo antes de medir quantização.
@@ -64,8 +64,18 @@ class Envelope:
         return cls(**json.loads(path.read_text(encoding="utf-8")))
 
 
-def load_model(dtype: str, max_length: int):
-    """Carrega o BGE-M3 denso na revisão fixada, em `cuda`.
+def load_model(
+    dtype: str,
+    max_length: int,
+    model_id: str = MODEL_ID,
+    revision: str = MODEL_REVISION,
+    dimensions: int = DIMENSIONS,
+):
+    """Carrega o modelo denso na revisão fixada, em `cuda`.
+
+    Sem argumentos de modelo, carrega o E5 do estudo. Os três argumentos existem
+    para a trilha do documento de arquitetura, que roda o mesmo pipeline com o
+    BGE-M3 (`scripts/15_embed_bge_m3.py`).
 
     Importa `torch`/`sentence_transformers` aqui dentro para que os módulos que
     só precisam do envelope não paguem alguns segundos de import de GPU.
@@ -74,8 +84,8 @@ def load_model(dtype: str, max_length: int):
     from sentence_transformers import SentenceTransformer
 
     model = SentenceTransformer(
-        MODEL_ID,
-        revision=MODEL_REVISION,
+        model_id,
+        revision=revision,
         device="cuda",
         model_kwargs={"dtype": getattr(torch, dtype)},
     )
@@ -87,8 +97,8 @@ def load_model(dtype: str, max_length: int):
     names = [type(m).__name__ for m in model]
     if names != ["Transformer", "Pooling", "Normalize"]:
         raise RuntimeError(f"pipeline inesperado do modelo: {names}")
-    if model.get_embedding_dimension() != DIMENSIONS:
-        raise RuntimeError(f"dimensão {model.get_embedding_dimension()} != {DIMENSIONS} esperada")
+    if model.get_embedding_dimension() != dimensions:
+        raise RuntimeError(f"dimensão {model.get_embedding_dimension()} != {dimensions} esperada")
     return model
 
 
