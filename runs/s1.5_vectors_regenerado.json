@@ -1,0 +1,37 @@
+{
+  "issue": "RAF-54",
+  "finished_at": "2026-10-20T17:06:32.124875+00:00",
+  "git_commit": "1c35b65a2afa3518648b288e0b6701c645e520be",
+  "corpus_sha256": "096b262a3444df3487eecedbdb26b9e443481b7d70d5cea9c6cbd0bf11219ec4",
+  "corpus_revision": "e5279055bba3e7ba1bece5c0eddd0ba232df49c3",
+  "passages": 1000000,
+  "envelope": {
+    "model_id": "intfloat/multilingual-e5-base",
+    "model_revision": "d128750597153bb5987e10b1c3493a34e5a4502a",
+    "dimensions": 768,
+    "max_length": 512,
+    "batch_size": 32,
+    "dtype": "float16",
+    "pooling": "mean",
+    "normalize": true,
+    "query_prefix": "query: ",
+    "passage_prefix": "passage: "
+  },
+  "array": {
+    "path": "data\\vectors\\quati_1m_float32.npy",
+    "dtype": "float32",
+    "shape": [
+      1000000,
+      768
+    ],
+    "bytes": 3072000128,
+    "sha256": "5ff16d96339f58daa4275a5b3a72e8bf388f4c0beac6cf96fe94b6995a2034db"
+  },
+  "timing": {
+    "_note": "passe retomado em blocos (0 a 350 mil em 15/10, o resto em 20/10), numa RTX 4050 Laptop; tempo total não comparável a um passe único",
+    "verified": {
+      "row_correspondence": "256/256",
+      "relevance_signal": "41/41"
+    }
+  }
+}
