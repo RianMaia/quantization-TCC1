@@ -23,4 +23,13 @@ foi digitado.
 
 ## BGE-M3 × E5, com o mesmo protocolo
 
-Pendente: falta `runs/exhaustive_bge-m3.json`.
+| Condição | nDCG@10 E5 | % do F32 (E5) | Δ vs F32 E5 (IC 95%) | nDCG@10 BGE-M3 | % do F32 (BGE-M3) | Δ vs F32 BGE-M3 (IC 95%) |
+|---|---|---|---|---|---|---|
+| F32 | 0.4356 | 100.0% | — | 0.5065 | 100.0% | — |
+| F16 | 0.4325 | 99.3% | -0.0030 [-0.0073, +0.0004] | 0.5079 | 100.3% | +0.0014 [-0.0001, +0.0043] |
+| I8 | 0.4337 | 99.6% | -0.0019 [-0.0071, +0.0034] | 0.5082 | 100.3% | +0.0016 [-0.0002, +0.0048] |
+| B1 | 0.1089 | 25.0% | -0.3267 [-0.3846, -0.2694] | 0.4377 | 86.4% | -0.0688 [-0.1049, -0.0334] |
+
+> Régua do documento de arquitetura: ganho 2^rel − 1, 50 consultas, busca
+> exaustiva. "% do F32" é o nDCG@10 da condição dividido pelo do F32 do
+> mesmo modelo.
