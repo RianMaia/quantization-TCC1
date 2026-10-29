@@ -82,17 +82,21 @@ def encode(vectors: np.ndarray, kind: str) -> dict:
         return {"kind": kind, "codes": np.array(vectors, dtype=np.float32)}
 
     scales = int8_scales(vectors) if kind == "I8" else None
-    blocks = []
+    codes = None
     for start in range(0, len(vectors), BLOCK):
         block = np.asarray(vectors[start : start + BLOCK], dtype=np.float32)
         if kind == "F16":
-            blocks.append(block.astype(np.float16))
+            block = block.astype(np.float16)
         elif kind == "I8":
             # `rint` arredonda ao par mais próximo; é a convenção registrada.
-            blocks.append(np.clip(np.rint(block / scales), -127, 127).astype(np.int8))
+            block = np.clip(np.rint(block / scales), -127, 127).astype(np.int8)
         else:
-            blocks.append(pack_bits(block))
-    representation = {"kind": kind, "codes": np.concatenate(blocks)}
+            block = pack_bits(block)
+        if codes is None:
+            # Alocado de uma vez: juntar os blocos no fim dobraria o pico de memória.
+            codes = np.empty((len(vectors), block.shape[1]), dtype=block.dtype)
+        codes[start : start + len(block)] = block
+    representation = {"kind": kind, "codes": codes}
     if scales is not None:
         representation["scales"] = scales
     return representation
