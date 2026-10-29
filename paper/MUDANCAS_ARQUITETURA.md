@@ -29,7 +29,7 @@ trilha do servidor (coluna "protocolo do estudo" em `paper/exhaustive_<modelo>.m
 
 | Item | Documento | Implementação | Situação |
 |---|---|---|---|
-| Modelo de embedding | `BAAI/bge-m3`, 1.024 dimensões | `intfloat/multilingual-e5-base`, 768 dimensões, nas duas trilhas | **Aberta.** Ver abaixo. |
+| Modelo de embedding | `BAAI/bge-m3`, 1.024 dimensões | `intfloat/multilingual-e5-base`, 768 dimensões, na trilha do servidor; E5 e BGE-M3 na trilha do documento | Fechada na trilha do documento. Ver abaixo. |
 | Mecanismo de busca | "FAISS ou mecanismo equivalente" | NumPy exaustivo (trilha do documento) e Qdrant (trilha do servidor) | Coberto pela seção 27.4, que deixa o backend como decisão do piloto. |
 | Condição F16 | prevista | implementada na trilha do documento | Fechada. |
 | Quantização por produto | "extensão, não necessária" (seção 7.1) | dois braços na trilha do servidor | Extensão, como previsto. |
@@ -59,6 +59,12 @@ e no manifesto da saída, e não em `config/embedding_envelope.json`, que é o
 envelope congelado da trilha do servidor. A comparação BGE-M3 × E5 sai de
 `scripts/16_compare_tracks.py`, com o mesmo protocolo para os dois modelos.
 
+A Tabela 3 existe para os dois modelos (`paper/exhaustive_e5.md` e
+`paper/exhaustive_bge-m3.md`). A diferença entre eles muda uma conclusão, e por
+isso a divergência não era só formal. No E5, o B1 retém 25% do nDCG@10 do F32;
+no BGE-M3, retém 86%. F16 e I8 não apresentam degradação detectável em nenhum
+dos dois. A trilha do servidor continua só com o E5.
+
 ## Proveniência
 
 - As medições da trilha do servidor (`runs/`, agosto de 2026) foram executadas
@@ -78,9 +84,13 @@ envelope congelado da trilha do servidor. A comparação BGE-M3 × E5 sai de
   código. A primeira execução da Tabela 3 do E5 (29/10) rodou com a RAM ocupada
   por outros processos, e o F32 mediu 525,8 ms por consulta, contra 148,8 ms
   numa execução de 27/10 com a máquina livre. A qualidade é idêntica nas duas,
-  porque o ranking não depende do tempo. Por isso a latência do E5 é medida de
-  novo nas mesmas condições da do BGE-M3, e só a comparação entre execuções
-  feitas em sequência na mesma máquina é válida.
+  porque o ranking não depende do tempo. Estava prevista uma nova medição do
+  E5 depois da do BGE-M3, mas ela foi cancelada: a máquina continuou em uso e
+  sob pressão de memória durante a execução do BGE-M3, e repetir a medição
+  nessas condições não daria um número mais confiável. As latências das duas
+  tabelas foram medidas sob pressão de memória. Só a qualidade é comparável
+  entre elas; da latência, vale a ordem entre as condições (B1 < F32 < I8 <
+  F16), que é a mesma nos dois modelos.
 - Na trilha do documento, F16 e I8 são reconstruídos em float32 bloco a bloco
   antes do produto interno, como a seção 27.1 descreve. A latência deles mede
   essa reconstrução em NumPy, não aceleração nativa de meia precisão ou de
@@ -91,3 +101,8 @@ envelope congelado da trilha do servidor. A comparação BGE-M3 × E5 sai de
 - Controle em inglês. Sem ele, o estudo mede quantização num benchmark nativo
   em português, mas não responde se o resultado difere do inglês.
 - Avaliação da resposta de um LLM (fora de escopo desde o documento).
+- A trilha do servidor com o BGE-M3. Sem ela, o resultado de memória a
+  provisionar no Qdrant vale só para o E5.
+- A análise de geometria dos vetores (degenerescência de sinal) sobre o
+  BGE-M3, que diria se a resistência dele ao binário tem o mecanismo oposto ao
+  do colapso do E5.
