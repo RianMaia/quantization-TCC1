@@ -1,0 +1,39 @@
+{
+  "finished_at": "2026-10-29T13:56:03.288842+00:00",
+  "git_commit": "1f0bb61963649d031c0f2406111a0a58cc492399",
+  "corpus_sha256": "096b262a3444df3487eecedbdb26b9e443481b7d70d5cea9c6cbd0bf11219ec4",
+  "envelope": {
+    "model_id": "BAAI/bge-m3",
+    "model_revision": "5617a9f61b028005a4858fdac845db406aefb181",
+    "dimensions": 1024,
+    "max_length": 512,
+    "batch_size": 16,
+    "dtype": "float16",
+    "pooling": "cls",
+    "normalize": true,
+    "query_prefix": "",
+    "passage_prefix": ""
+  },
+  "array": {
+    "path": "data\\vectors\\bge_m3_1m_float32.npy",
+    "shape": [
+      1000000,
+      1024
+    ],
+    "sha256": "208882f9f250c68adcce290f7229818c9d35c31f0b62d78050eaaffaa6a8c224",
+    "worst_norm_error": 1.7881393432617188e-07
+  },
+  "queries": {
+    "path": "data\\vectors\\bge_m3_queries_float32.npy",
+    "shape": [
+      50,
+      1024
+    ],
+    "sha256": "0efce4ef3c7ecec3fe12d2cb19896a7a3416756fb025e55f1ef9d64630d5c70b"
+  },
+  "timing": {
+    "resumed_from": 0,
+    "encoded": 1000000,
+    "seconds": 16029.210103100006
+  }
+}
