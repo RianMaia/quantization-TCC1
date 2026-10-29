@@ -88,6 +88,9 @@ def embed_queries() -> np.ndarray:
 
 def main() -> int:
     corpus.verify_manifest()
+    # Lido antes do passe de horas: chamar o git no fim, com a RAM cheia, já
+    # falhou ao criar o processo.
+    commit = vectors.git_commit()
     print(f"envelope: {ENVELOPE.model_id} @ {ENVELOPE.model_revision[:8]} ({ENVELOPE.dimensions}d)")
 
     timing = vectors.run_pass(ENVELOPE, ARRAY_PATH, PROGRESS_PATH)
@@ -103,7 +106,7 @@ def main() -> int:
         json.dumps(
             {
                 "finished_at": datetime.now(UTC).isoformat(),
-                "git_commit": vectors.git_commit(),
+                "git_commit": commit,
                 "corpus_sha256": corpus.read_manifest()["files"]["corpus"]["sha256"],
                 "envelope": ENVELOPE.__dict__,
                 "array": {

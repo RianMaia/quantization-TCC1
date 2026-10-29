@@ -142,6 +142,9 @@ def main() -> int:
         raise SystemExit(f"{BASELINE} é a referência de toda comparação e não pode ficar de fora")
 
     manifest.require_clean_tree(args.allow_dirty)
+    # Lido antes da medição: é o código que vai rodar, e chamar o git depois de
+    # uma hora de RAM cheia já falhou ao criar o processo.
+    commit, dirty = manifest.git_commit(), manifest.git_is_dirty()
     passages, queries, passage_ids = load_inputs(args.corpus, args.queries)
     query_ids = corpus.judged_query_ids()
     qrels = corpus.load_qrels()
@@ -203,8 +206,8 @@ def main() -> int:
     evidence = {
         "label": args.label,
         "finished_at": datetime.now(UTC).isoformat(),
-        "git_commit": manifest.git_commit(),
-        "git_dirty": manifest.git_is_dirty(),
+        "git_commit": commit,
+        "git_dirty": dirty,
         "protocol": "documento de arquitetura, seção 27: busca exaustiva, ganho 2^rel − 1, relevante = grau > 0",
         "inputs": {
             "corpus_vectors": {
