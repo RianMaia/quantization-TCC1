@@ -80,6 +80,8 @@ python scripts/12_oversampling.py           # M3.4 — escada de oversampling do
 python scripts/11_regenerate.py             # M4.4 — todas as tabelas
 python scripts/13_figures.py                # figuras e análise por consulta; offline
 python scripts/14_exhaustive.py --label e5  # trilha exaustiva F32/F16/I8/B1; sem servidor
+python scripts/15_embed_bge_m3.py           # vetores do BGE-M3; GPU, horas, retomável
+python scripts/16_compare_tracks.py         # exaustiva × Qdrant e BGE-M3 × E5; offline
 ```
 
 As medições longas devem rodar sob `systemd-inhibit --what=sleep:idle`: se a
