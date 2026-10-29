@@ -73,8 +73,10 @@ def tracks_table(e5: dict, decomposition: dict) -> tuple[str, list[dict]]:
             }
         )
     lines = [
-        "| Representação | Exaustiva | Δ vs F32 | Qdrant, só quantização | Δ vs A0 exato "
-        "| Qdrant, como medido | Δ vs A0 exato |",
+        (
+            "| Representação | Exaustiva | Δ vs F32 | Qdrant, só quantização | Δ vs A0 exato "
+            "| Qdrant, como medido | Δ vs A0 exato |"
+        ),
         "|---|---|---|---|---|---|---|",
     ]
     for row in rows:
@@ -168,6 +170,88 @@ def figure(rows: list[dict], evidence: dict[str, dict]) -> None:
     figures.save(fig, "comparacao_trilhas.png")
 
 
+def confidence_figure(evidence: dict[str, dict]) -> None:
+    """A Tabela 3 de cada modelo no formato de `confianca.png`: Δ contra o F32 com IC."""
+    fig, axes = plt.subplots(
+        1, len(evidence), figsize=(5.2 * len(evidence), 2.6), sharex=True, squeeze=False
+    )
+    for axis, (name, row) in zip(axes[0], evidence.items(), strict=True):
+        kinds = [k for k in reversed(CONDITIONS) if row["conditions"][k]["versus_f32"]]
+        for position, kind in enumerate(kinds):
+            versus = row["conditions"][kind]["versus_f32"]
+            low, high, mean = versus["ci_low"], versus["ci_high"], versus["mean_difference"]
+            crosses_zero = low <= 0 <= high
+            colour = figures.MUTED if crosses_zero else figures.PRIMARY
+            axis.plot([low, high], [position, position], color=colour, linewidth=2, zorder=2)
+            axis.scatter(
+                [mean],
+                [position],
+                s=50,
+                zorder=3,
+                linewidth=1.5,
+                edgecolors=colour,
+                facecolors=figures.SURFACE if crosses_zero else figures.PRIMARY,
+            )
+            axis.annotate(
+                f"{mean:+.4f}  [{low:+.4f}, {high:+.4f}]",
+                (high, position),
+                xytext=(8, -3),
+                textcoords="offset points",
+                color=figures.INK,
+                fontsize=8,
+            )
+        axis.axvline(0, color=figures.INK, linewidth=0.8, zorder=1)
+        axis.set_yticks(range(len(kinds)), kinds)
+        axis.tick_params(axis="y", colors=figures.INK)
+        axis.grid(axis="y", visible=False)
+        axis.set_xlim(-0.45, 0.25)
+        axis.set_title(name)
+        axis.set_xlabel("Diferença de nDCG@10 contra o F32, com IC 95%")
+    fig.suptitle(
+        "Vazado: o intervalo contém zero. Cheio: inteiramente abaixo de zero",
+        x=0.01,
+        ha="left",
+        fontsize=10,
+    )
+    fig.tight_layout()
+    figures.save(fig, "tabela3_confianca.png")
+
+
+def memory_figure(evidence: dict[str, dict]) -> None:
+    """Qualidade contra memória das quatro condições, um marcador por modelo."""
+    fig, axis = plt.subplots(figsize=(6.4, 3.8))
+    markers = iter([("o", figures.PRIMARY), ("s", figures.SURFACE)])
+    for name, row in evidence.items():
+        marker, face = next(markers)
+        memory = [
+            row["conditions"][k]["performance"]["representation_bytes"] / 1e9 for k in CONDITIONS
+        ]
+        quality = [row["conditions"][k]["quality"]["aggregate"]["nDCG@10"] for k in CONDITIONS]
+        axis.plot(
+            memory,
+            quality,
+            marker=marker,
+            markersize=8,
+            markerfacecolor=face,
+            markeredgecolor=figures.INK,
+            color=figures.MUTED,
+            linewidth=1,
+            label=name,
+        )
+        for kind, x, y in zip(CONDITIONS, memory, quality, strict=True):
+            axis.annotate(kind, (x, y), xytext=(6, 6), textcoords="offset points", fontsize=8)
+    axis.set_xscale("log", base=2)
+    ticks = [0.1, 0.25, 0.5, 1, 2, 4]
+    axis.set_xticks(ticks, [f"{t:g}".replace(".", ",") for t in ticks])
+    axis.minorticks_off()
+    axis.set_xlabel("Memória dos vetores (GB, escala log)  (menor é melhor)")
+    axis.set_ylabel("nDCG@10  (maior é melhor)")
+    axis.set_ylim(0, 0.6)
+    axis.set_title("Tabela 3: qualidade × memória na busca exaustiva")
+    axis.legend(frameon=False, fontsize=8, loc="lower right")
+    figures.save(fig, "tabela3_memoria.png")
+
+
 def main() -> int:
     e5 = load("exhaustive_e5.json")
     if e5 is None:
@@ -190,8 +274,8 @@ def main() -> int:
         tracks,
         "",
         "> Régua do estudo: ganho linear, 49 consultas. A busca exata do A0 no Qdrant",
-        f"> dá {decomposition['reference']['nDCG@10']:.4f}. \"Só quantização\" é o platô sem",
-        "> reordenação, com o grafo já convergido; \"como medido\" é a Tabela T1 de",
+        f'> dá {decomposition["reference"]["nDCG@10"]:.4f}. "Só quantização" é o platô sem',
+        '> reordenação, com o grafo já convergido; "como medido" é a Tabela T1 de',
         "> `paper/tables.md` (ef 128, reordenação padrão). A trilha exaustiva usa os",
         "> vetores regenerados; o top-10 e o top-100 do F32 coincidem com os da busca",
         f"> exata do A0 original em {overlap['@10']:.3f} e {overlap['@100']:.3f}.",
@@ -206,7 +290,7 @@ def main() -> int:
             models_table(evidence),
             "",
             "> Régua do documento de arquitetura: ganho 2^rel − 1, 50 consultas, busca",
-            "> exaustiva. \"% do F32\" é o nDCG@10 da condição dividido pelo do F32 do",
+            '> exaustiva. "% do F32" é o nDCG@10 da condição dividido pelo do F32 do',
             "> mesmo modelo.",
         ]
     else:
@@ -216,6 +300,8 @@ def main() -> int:
     OUTPUT.write_text("\n".join(report), encoding="utf-8")
     print(f"→ {OUTPUT}")
     figure(rows, evidence)
+    confidence_figure(evidence)
+    memory_figure(evidence)
     return 0
 
 
