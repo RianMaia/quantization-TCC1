@@ -25,8 +25,10 @@ embedding pensando em compressão.
 
 from __future__ import annotations
 
+import argparse
 import json
 from datetime import UTC, datetime
+from pathlib import Path
 
 import numpy as np
 
@@ -57,12 +59,19 @@ def binary_entropy(p: np.ndarray) -> np.ndarray:
 
 
 def main() -> int:
-    envelope = embedding.Envelope.load()
-    array = vectors.load()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--corpus", type=Path, default=vectors.ARRAY_PATH)
+    parser.add_argument("--model-id", help="padrão: o do envelope congelado (E5)")
+    parser.add_argument("--output", type=Path, default=OUTPUT)
+    args = parser.parse_args()
+
+    model_id = args.model_id or embedding.Envelope.load().model_id
+    array = np.load(args.corpus, mmap_mode="r")
+    dimensions = array.shape[1]
     rng = np.random.default_rng(SEED)
     rows = np.sort(rng.choice(array.shape[0], size=SAMPLE, replace=False))
 
-    print(f"amostrando {SAMPLE:,} de {array.shape[0]:,} vetores de {envelope.dimensions}d …")
+    print(f"amostrando {SAMPLE:,} de {array.shape[0]:,} vetores de {dimensions}d …")
     sample = np.asarray(array[rows], dtype=np.float32)
 
     means = sample.mean(axis=0)
@@ -79,35 +88,39 @@ def main() -> int:
     # em torno dela. Alto significa que o corte em zero não passa pelo meio dos dados.
     offset_ratio = float(np.mean(np.abs(means) / stds))
 
-    print(f"\n=== geometria de {envelope.model_id} ===")
-    print(f"dimensões                          {envelope.dimensions}")
+    print(f"\n=== geometria de {model_id} ===")
+    print(f"dimensões                          {dimensions}")
     print(f"média das médias por dimensão      {means.mean():+.5f}")
     print(f"|média|/desvio, média              {offset_ratio:.3f}")
     print(f"fração majoritária de sinal (mediana) {np.median(majority):.3f}")
-    print(
-        f"dimensões degeneradas (>= {DEGENERACY_THRESHOLD:.2f})   {degenerate} de {envelope.dimensions}"
-    )
-    print(f"bits efetivos                      {effective_bits:.1f} de {envelope.dimensions}")
-    print(
-        f"orçamento efetivo                  {effective_bits / envelope.dimensions:.1%} do nominal"
-    )
+    print(f"dimensões degeneradas (>= {DEGENERACY_THRESHOLD:.2f})   {degenerate} de {dimensions}")
+    print(f"bits efetivos                      {effective_bits:.1f} de {dimensions}")
+    print(f"orçamento efetivo                  {effective_bits / dimensions:.1%} do nominal")
 
     quartis = np.percentile(majority, [50, 75, 90, 99])
     print(f"fração majoritária p50/p75/p90/p99 {' '.join(f'{q:.3f}' for q in quartis)}")
 
-    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT.write_text(
+    if args.output == OUTPUT:
+        slot = (
+            "PERDIDO. A RAF-65 exigia a predição registrada antes de o nDCG do braço "
+            "binário ser examinado. O A4 já estava medido em 0,0773 quando esta análise "
+            "rodou, então isto é explicação post-hoc e está rotulado como tal."
+        )
+    else:
+        slot = (
+            "Explicação post-hoc: o nDCG@10 do B1 deste modelo já estava medido na "
+            "Tabela 3 quando esta análise rodou."
+        )
+
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text(
         json.dumps(
             {
                 "issue": "RAF-65",
                 "computed_at": datetime.now(UTC).isoformat(),
-                "_prediction_slot": (
-                    "PERDIDO. A RAF-65 exigia a predição registrada antes de o nDCG do braço "
-                    "binário ser examinado. O A4 já estava medido em 0,0773 quando esta análise "
-                    "rodou, então isto é explicação post-hoc e está rotulado como tal."
-                ),
-                "model_id": envelope.model_id,
-                "dimensions": envelope.dimensions,
+                "_prediction_slot": slot,
+                "model_id": model_id,
+                "dimensions": dimensions,
                 "sample_size": SAMPLE,
                 "seed": SEED,
                 "degeneracy_threshold": DEGENERACY_THRESHOLD,
@@ -122,7 +135,7 @@ def main() -> int:
                 },
                 "degenerate_dimensions": degenerate,
                 "effective_bits": effective_bits,
-                "effective_fraction_of_nominal": effective_bits / envelope.dimensions,
+                "effective_fraction_of_nominal": effective_bits / dimensions,
                 "per_dimension": {
                     "mean": means.tolist(),
                     "std": stds.tolist(),
@@ -135,7 +148,7 @@ def main() -> int:
         + "\n",
         encoding="utf-8",
     )
-    print(f"\n→ {OUTPUT}")
+    print(f"\n→ {args.output}")
     return 0
 
 

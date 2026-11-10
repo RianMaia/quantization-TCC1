@@ -31,6 +31,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import numpy as np
 
 from quantptbr import corpus
 
@@ -48,6 +49,12 @@ _spec.loader.exec_module(figures)
 PAIRS = [("float32", "F32", "A0"), ("int8", "I8", "A1"), ("binária", "B1", "A4")]
 CONDITIONS = ["F32", "F16", "I8", "B1"]
 MODELS = {"e5": "E5", "bge-m3": "BGE-M3"}
+#: Saídas de `scripts/09_vector_geometry.py`, uma por modelo.
+GEOMETRY = {"E5": "m2.8_geometry.json", "BGE-M3": "m2.8_geometry_bge-m3.json"}
+
+
+def decimal(value: float, digits: int = 1) -> str:
+    return f"{value:.{digits}f}".replace(".", ",")
 
 
 def load(name: str) -> dict | None:
@@ -252,6 +259,62 @@ def memory_figure(evidence: dict[str, dict]) -> None:
     figures.save(fig, "tabela3_memoria.png")
 
 
+def geometry_table(geometry: dict[str, dict], evidence: dict[str, dict]) -> str:
+    lines = [
+        (
+            "| Modelo | Dimensões | Degeneradas em sinal (≥ 0,95) | Bits efetivos | % do nominal "
+            "| B1, % do nDCG@10 do F32 |"
+        ),
+        "|---|---|---|---|---|---|",
+    ]
+    for name, row in geometry.items():
+        lines.append(
+            f"| {name} | {row['dimensions']} | {row['degenerate_dimensions']} "
+            f"| {decimal(row['effective_bits'])} "
+            f"| {decimal(100 * row['effective_fraction_of_nominal'])}% "
+            f"| {decimal(100 * retention(evidence[name])['B1'])}% |"
+        )
+    return "\n".join(lines)
+
+
+def geometry_figure(geometry: dict[str, dict]) -> None:
+    """Fração de vetores com o bit majoritário por dimensão, um painel por modelo."""
+    fig, axes = plt.subplots(
+        1, len(geometry), figsize=(5.2 * len(geometry), 3.4), sharey=True, squeeze=False
+    )
+    # Arredondado para o limiar cair exatamente numa borda (ver 13_figures.py).
+    edges = np.round(np.linspace(0.5, 1.0, 21), 3)
+    for axis, (name, row) in zip(axes[0], geometry.items(), strict=True):
+        positive = np.array(row["per_dimension"]["positive_fraction"])
+        majority = np.maximum(positive, 1 - positive)
+        threshold = row["degeneracy_threshold"]
+        _, _, patches = axis.hist(
+            majority,
+            bins=edges,
+            weights=np.full(majority.size, 100 / majority.size),
+            color=figures.PRIMARY,
+            edgecolor=figures.SURFACE,
+            linewidth=1,
+        )
+        for patch, left in zip(patches, edges[:-1], strict=True):
+            if left >= threshold:
+                patch.set_facecolor(figures.SECONDARY)
+                patch.set_hatch("///")
+        axis.axvline(threshold, color=figures.INK, linewidth=0.8, linestyle="--")
+        axis.set_title(
+            f"{name}: {row['degenerate_dimensions']} de {row['dimensions']} dimensões "
+            f"degeneradas\n{decimal(row['effective_bits'])} bits efetivos "
+            f"({decimal(100 * row['effective_fraction_of_nominal'])}% do nominal)",
+            fontsize=9,
+        )
+        axis.set_xlabel(
+            "Fração dos vetores com o bit majoritário\n(0,5 = equilíbrio, 1,0 = bit inútil)"
+        )
+    axes[0][0].set_ylabel("% das dimensões")
+    fig.tight_layout()
+    figures.save(fig, "geometria_modelos.png")
+
+
 def main() -> int:
     e5 = load("exhaustive_e5.json")
     if e5 is None:
@@ -297,11 +360,27 @@ def main() -> int:
         report.append("Pendente: falta `runs/exhaustive_bge-m3.json`.")
     report.append("")
 
+    geometry = {name: row for name, path in GEOMETRY.items() if (row := load(path))}
+    if len(geometry) == len(GEOMETRY) and "BGE-M3" in evidence:
+        report += [
+            "## Geometria dos vetores e o binário",
+            "",
+            geometry_table(geometry, evidence),
+            "",
+            "> Saída de `scripts/09_vector_geometry.py`: amostra de 200.000 vetores,",
+            "> limiar de 0,95 declarado antes do cálculo. Bits efetivos é a soma da",
+            "> entropia do sinal por dimensão, ignorando correlação entre dimensões.",
+            "> Explicação post-hoc: o B1 dos dois modelos já estava medido.",
+            "",
+        ]
+
     OUTPUT.write_text("\n".join(report), encoding="utf-8")
     print(f"→ {OUTPUT}")
     figure(rows, evidence)
     confidence_figure(evidence)
     memory_figure(evidence)
+    if len(geometry) == len(GEOMETRY):
+        geometry_figure(geometry)
     return 0
 
 
