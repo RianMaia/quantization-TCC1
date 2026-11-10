@@ -12,6 +12,7 @@ degradação detectável neste tamanho de amostra", nunca equivalência.
 | Tabela 3 (E5) | `paper/exhaustive_e5.md` |
 | Tabela 3 (BGE-M3) | `paper/exhaustive_bge-m3.md` |
 | Comparação entre trilhas e entre modelos | `paper/comparacao_trilhas.md`, figura `paper/figures/comparacao_trilhas.png` |
+| Geometria dos vetores, E5 × BGE-M3 | `paper/comparacao_trilhas.md`, figura `paper/figures/geometria_modelos.png` |
 | T1 a T8 (trilha do servidor) | `paper/tables.md` |
 
 ## Validação do aparelho de medição
@@ -149,11 +150,16 @@ direita).
   não foi testada. Os modelos também ordenam de forma diferente: o top-10 do
   F32 do BGE-M3 coincide com o da busca exata do A0 (E5) em só 44,2%.
 
-A conclusão sobre a quantização binária, portanto, depende do modelo. No E5, a
-geometria explica o colapso: 323 das 768 dimensões são degeneradas em sinal
-(T5). A mesma análise ainda não foi feita sobre os vetores do BGE-M3. Ela é o
-próximo passo para dizer se a diferença entre os modelos vem do mesmo
-mecanismo.
+A conclusão sobre a quantização binária, portanto, depende do modelo, e a
+geometria dos vetores explica a diferença (figura `geometria_modelos.png` e
+última tabela de `paper/comparacao_trilhas.md`). Com o mesmo limiar de 0,95,
+declarado antes do cálculo, o E5 tem 323 de 768 dimensões degeneradas em sinal
+e o código binário fica com 324,7 bits efetivos (42,3% do nominal). O BGE-M3
+tem 18 de 1.024 dimensões degeneradas e 871,0 bits efetivos (85,1%). O modelo
+que perde menos no binário é o que entrega mais bits úteis ao código binário.
+Com dois modelos, isso é uma explicação consistente com os dados, não uma lei:
+a análise foi feita depois de o B1 dos dois já estar medido, e dois pontos não
+permitem estimar a relação entre bits efetivos e retenção.
 
 ## Limitações que acompanham estes resultados
 

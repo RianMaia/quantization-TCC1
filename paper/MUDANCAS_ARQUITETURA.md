@@ -65,6 +65,12 @@ isso a divergência não era só formal. No E5, o B1 retém 25% do nDCG@10 do F3
 no BGE-M3, retém 86%. F16 e I8 não apresentam degradação detectável em nenhum
 dos dois. A trilha do servidor continua só com o E5.
 
+A geometria dos vetores (`scripts/09_vector_geometry.py`) também roda sobre os
+dois modelos e explica a diferença no binário: o E5 tem 323 de 768 dimensões
+degeneradas em sinal e o BGE-M3, 18 de 1.024. Recalculada sobre os vetores
+regenerados do E5, a análise dá as mesmas 323 dimensões e 324,7 bits efetivos
+da execução original de agosto.
+
 ## Proveniência
 
 - As medições da trilha do servidor (`runs/`, agosto de 2026) foram executadas
@@ -103,6 +109,5 @@ dos dois. A trilha do servidor continua só com o E5.
 - Avaliação da resposta de um LLM (fora de escopo desde o documento).
 - A trilha do servidor com o BGE-M3. Sem ela, o resultado de memória a
   provisionar no Qdrant vale só para o E5.
-- A análise de geometria dos vetores (degenerescência de sinal) sobre o
-  BGE-M3, que diria se a resistência dele ao binário tem o mecanismo oposto ao
-  do colapso do E5.
+- O documento jurídico do TRE. O corpus continua sendo só o Quati, conteúdo
+  web genérico.

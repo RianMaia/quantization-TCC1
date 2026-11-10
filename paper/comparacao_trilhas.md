@@ -33,3 +33,15 @@ foi digitado.
 > Régua do documento de arquitetura: ganho 2^rel − 1, 50 consultas, busca
 > exaustiva. "% do F32" é o nDCG@10 da condição dividido pelo do F32 do
 > mesmo modelo.
+
+## Geometria dos vetores e o binário
+
+| Modelo | Dimensões | Degeneradas em sinal (≥ 0,95) | Bits efetivos | % do nominal | B1, % do nDCG@10 do F32 |
+|---|---|---|---|---|---|
+| E5 | 768 | 323 | 324,7 | 42,3% | 25,0% |
+| BGE-M3 | 1024 | 18 | 871,0 | 85,1% | 86,4% |
+
+> Saída de `scripts/09_vector_geometry.py`: amostra de 200.000 vetores,
+> limiar de 0,95 declarado antes do cálculo. Bits efetivos é a soma da
+> entropia do sinal por dimensão, ignorando correlação entre dimensões.
+> Explicação post-hoc: o B1 dos dois modelos já estava medido.
